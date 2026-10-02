@@ -1,0 +1,19 @@
+# Firebase CLI local cache/logs
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Node (if any build tooling gets added later)
+node_modules/
+
+# Android (added once the widget app exists)
+android/.gradle/
+android/build/
+android/*/build/
+android/local.properties
+android/*.apk
+
+# Editor/OS noise
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Our Countdown</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="login-screen" class="screen">
+  <div class="login-card">
+    <h1>Our Countdown</h1>
+    <p class="subtitle">Enter the password to unlock</p>
+    <input type="password" id="password-input" placeholder="Password" autocomplete="current-password" />
+    <button id="login-button">Unlock</button>
+    <p id="login-error" class="error-text hidden"></p>
+  </div>
+</div>
+
+<div id="app-screen" class="screen hidden">
+  <header>
+    <h1>Our Countdown</h1>
+    <button id="logout-button" title="Sign out of this device">Sign out</button>
+  </header>
+
+  <section id="primary-countdown" class="primary-card hidden">
+    <div class="primary-label" id="primary-label"></div>
+    <div class="primary-time" id="primary-time"></div>
+  </section>
+
+  <section id="empty-state" class="hidden">
+    <p>No countdowns yet. Add the next one below.</p>
+  </section>
+
+  <section id="countdown-list"></section>
+
+  <button id="add-button">+ Add a countdown</button>
+</div>
+
+<div id="edit-modal" class="screen hidden">
+  <div class="modal-card">
+    <h2 id="modal-title">Add countdown</h2>
+    <label for="label-input">What is it?</label>
+    <input type="text" id="label-input" maxlength="80" placeholder="e.g. I'm home" />
+
+    <label for="date-input">When?</label>
+    <input type="datetime-local" id="date-input" />
+
+    <div class="modal-actions">
+      <button id="cancel-button" class="secondary">Cancel</button>
+      <button id="delete-button" class="danger hidden">Delete</button>
+      <button id="save-button">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
