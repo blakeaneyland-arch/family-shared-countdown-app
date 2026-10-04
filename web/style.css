@@ -67,6 +67,11 @@ h2 {
   backdrop-filter: blur(6px);
 }
 
+.modal-card {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
 .subtitle { color: var(--text-dim); margin: 8px 0 20px; }
 
 input[type="password"],
@@ -130,8 +135,7 @@ button.danger {
 }
 
 .primary-label {
-  color: var(--text-dim);
-  font-size: calc(1.2rem * var(--tile-scale, 1) * var(--primary-scale, 1));
+  font-size: calc(1.6rem * var(--tile-scale, 1) * var(--primary-scale, 1));
   margin-bottom: 4px;
 }
 
@@ -147,19 +151,26 @@ button.danger {
   padding: 24px 0;
 }
 
-#countdown-list { margin-bottom: 90px; }
+#countdown-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 90px;
+}
 
 /* Each tile is a shorter version of the featured card: same shape, solid
-   fill (no dashed border). Background/text color, font, and opacity are
-   all set inline from JS since they're independent per tile. */
+   fill (no dashed border). Sized to its own content (a short label makes
+   a small chip) rather than always filling the row. Background/text
+   color, font, and opacity are all set inline from JS since they're
+   independent per tile. */
 .countdown-item {
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  text-align: center;
+  border-radius: var(--radius);
+  padding: 16px 22px;
   backdrop-filter: blur(4px);
 }
 
