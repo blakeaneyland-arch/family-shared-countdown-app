@@ -6,7 +6,6 @@
   --danger: #e25c5c;
   --ui-accent: #e2b33c;
   --radius: 16px;
-  --default-item-color: #e2b33c;
 }
 
 * { box-sizing: border-box; }
@@ -130,18 +129,15 @@ button.danger {
 }
 
 .primary-label {
-  font-family: "Caveat", cursive;
   color: var(--text-dim);
   font-size: 1.2rem;
   margin-bottom: 4px;
 }
 
 .primary-time {
-  font-family: "Caveat", cursive;
   font-size: 2.6rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: var(--item-color, var(--default-item-color));
 }
 
 #empty-state {
@@ -152,36 +148,34 @@ button.danger {
 
 #countdown-list { margin-bottom: 90px; }
 
-/* Paper chain links: each tile carries its own --item-color custom property,
-   set inline from JS, so colors are per-tile rather than one shared theme. */
+/* Each tile is a shorter version of the featured card: same shape, solid
+   fill (no dashed border). Background/text color, font, and opacity are
+   all set inline from JS since they're independent per tile. */
 .countdown-item {
-  --item-color: var(--default-item-color);
-  background: color-mix(in srgb, var(--item-color) 24%, var(--bg-elevated) 76%);
-  border: 2px dashed color-mix(in srgb, var(--item-color) 60%, white 10%);
-  border-radius: 999px;
-  padding: 14px 20px;
+  border-radius: var(--radius);
+  padding: 16px 20px;
   margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  backdrop-filter: blur(4px);
 }
 
 .countdown-item .item-label {
-  font-family: "Caveat", cursive;
   font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 2px;
 }
 
 .countdown-item .item-time {
-  color: var(--text-dim);
   font-size: 0.9rem;
+  opacity: 0.85;
 }
 
 .countdown-item .item-time.today {
-  color: var(--item-color);
-  font-weight: 600;
+  font-weight: 700;
+  opacity: 1;
 }
 
 /* Floating "+" button -- the only chrome left outside the tiles/background. */
@@ -247,4 +241,30 @@ button.danger {
 
 .color-swatch.selected {
   border-color: var(--text);
+}
+
+.font-options {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.font-option {
+  flex: 1;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: #343b4c;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.font-option.selected {
+  border-color: var(--ui-accent);
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-bottom: 16px;
+  accent-color: var(--ui-accent);
 }

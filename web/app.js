@@ -4,8 +4,19 @@ const db = firebase.firestore();
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 const SHARED_EMAIL = window.SHARED_AUTH_EMAIL;
+
 const DEFAULT_COLOR = "#e2b33c";
+const DEFAULT_TEXT_COLOR = "#f4f3f7";
+const DEFAULT_FONT = "caveat";
+const DEFAULT_OPACITY = 30;
+
 const COLOR_PALETTE = ["#e2b33c", "#9b3a3a", "#3b5a8a", "#4a7a4f", "#c97a3d", "#3a8a82"];
+const TEXT_COLOR_PALETTE = ["#f4f3f7", "#1b1f2a", "#e2b33c", "#ff7a9e"];
+const FONTS = {
+  caveat: { label: "Caveat", family: "'Caveat', cursive" },
+  patrick: { label: "Patrick Hand", family: "'Patrick Hand', sans-serif" },
+  fredoka: { label: "Fredoka", family: "'Fredoka', sans-serif" },
+};
 
 // ---- element refs ----
 const loginScreen = document.getElementById("login-screen");
@@ -28,13 +39,18 @@ const modalTitle = document.getElementById("modal-title");
 const labelInput = document.getElementById("label-input");
 const dateInput = document.getElementById("date-input");
 const colorSwatchesEl = document.getElementById("color-swatches");
+const textColorSwatchesEl = document.getElementById("text-color-swatches");
+const fontOptionsEl = document.getElementById("font-options");
+const opacityInput = document.getElementById("opacity-input");
 const saveButton = document.getElementById("save-button");
 const cancelButton = document.getElementById("cancel-button");
 const deleteButton = document.getElementById("delete-button");
 
-let currentCountdowns = []; // [{id, label, targetDate: Date, color}]
+let currentCountdowns = []; // [{id, label, targetDate, color, textColor, font, opacity}]
 let editingId = null;
 let selectedColor = DEFAULT_COLOR;
+let selectedTextColor = DEFAULT_TEXT_COLOR;
+let selectedFont = DEFAULT_FONT;
 let unsubscribeSnapshot = null;
 
 // ---- auth ----
@@ -85,10 +101,27 @@ function startListening() {
           label: data.label,
           targetDate: data.targetDate.toDate(),
           color: data.color || DEFAULT_COLOR,
+          textColor: data.textColor || DEFAULT_TEXT_COLOR,
+          font: data.font && FONTS[data.font] ? data.font : DEFAULT_FONT,
+          opacity: data.opacity != null ? data.opacity : DEFAULT_OPACITY,
         };
       });
       renderAll();
     });
+}
+
+// ---- color helpers ----
+function hexToRgba(hex, opacityPercent) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacityPercent / 100})`;
+}
+
+function applyTileStyle(el, item) {
+  el.style.background = hexToRgba(item.color, item.opacity);
+  el.style.color = item.textColor;
+  el.style.fontFamily = FONTS[item.font].family;
 }
 
 // ---- rendering ----
@@ -105,7 +138,7 @@ function renderPrimary() {
     return;
   }
   primaryCard.classList.remove("hidden");
-  primaryCard.style.setProperty("--item-color", upcoming.color);
+  applyTileStyle(primaryCard, upcoming);
   primaryLabel.textContent = upcoming.label;
   primaryTime.textContent = formatDuration(upcoming.targetDate - now, true);
 }
@@ -124,7 +157,7 @@ function renderList() {
     const diff = item.targetDate - now;
     const row = document.createElement("div");
     row.className = "countdown-item";
-    row.style.setProperty("--item-color", item.color);
+    applyTileStyle(row, item);
     row.innerHTML = `
       <div>
         <div class="item-label"></div>
@@ -162,29 +195,57 @@ setInterval(renderAll, 1000);
 addButton.addEventListener("click", () => openEditModal(null));
 cancelButton.addEventListener("click", closeEditModal);
 
-function renderColorSwatches() {
-  colorSwatchesEl.innerHTML = "";
-  for (const color of COLOR_PALETTE) {
+function renderSwatchRow(container, palette, selected, onPick) {
+  container.innerHTML = "";
+  for (const color of palette) {
     const swatch = document.createElement("button");
     swatch.type = "button";
-    swatch.className = "color-swatch" + (color === selectedColor ? " selected" : "");
+    swatch.className = "color-swatch" + (color === selected ? " selected" : "");
     swatch.style.background = color;
-    swatch.addEventListener("click", () => {
-      selectedColor = color;
-      renderColorSwatches();
-    });
-    colorSwatchesEl.appendChild(swatch);
+    swatch.addEventListener("click", () => onPick(color));
+    container.appendChild(swatch);
   }
+}
+
+function renderFontOptions() {
+  fontOptionsEl.innerHTML = "";
+  for (const [key, font] of Object.entries(FONTS)) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "font-option" + (key === selectedFont ? " selected" : "");
+    btn.style.fontFamily = font.family;
+    btn.textContent = font.label;
+    btn.addEventListener("click", () => {
+      selectedFont = key;
+      renderFontOptions();
+    });
+    fontOptionsEl.appendChild(btn);
+  }
+}
+
+function renderPickers() {
+  renderSwatchRow(colorSwatchesEl, COLOR_PALETTE, selectedColor, (color) => {
+    selectedColor = color;
+    renderPickers();
+  });
+  renderSwatchRow(textColorSwatchesEl, TEXT_COLOR_PALETTE, selectedTextColor, (color) => {
+    selectedTextColor = color;
+    renderPickers();
+  });
+  renderFontOptions();
 }
 
 function openEditModal(item) {
   editingId = item ? item.id : null;
   selectedColor = item ? item.color : DEFAULT_COLOR;
+  selectedTextColor = item ? item.textColor : DEFAULT_TEXT_COLOR;
+  selectedFont = item ? item.font : DEFAULT_FONT;
+  opacityInput.value = item ? item.opacity : DEFAULT_OPACITY;
   modalTitle.textContent = item ? "Edit countdown" : "Add countdown";
   labelInput.value = item ? item.label : "";
   dateInput.value = item ? toDatetimeLocalValue(item.targetDate) : "";
   deleteButton.classList.toggle("hidden", !item);
-  renderColorSwatches();
+  renderPickers();
   editModal.classList.remove("hidden");
 }
 
@@ -203,6 +264,9 @@ saveButton.addEventListener("click", async () => {
     label,
     targetDate: firebase.firestore.Timestamp.fromDate(targetDate),
     color: selectedColor,
+    textColor: selectedTextColor,
+    font: selectedFont,
+    opacity: Number(opacityInput.value),
   };
 
   if (editingId) {

@@ -6,7 +6,7 @@
 <title>Our Countdown</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Fredoka:wght@500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -47,8 +47,17 @@
     <label for="date-input">When?</label>
     <input type="datetime-local" id="date-input" />
 
-    <label>Color</label>
+    <label>Tile color</label>
     <div class="color-swatches" id="color-swatches"></div>
+
+    <label>Text color</label>
+    <div class="color-swatches" id="text-color-swatches"></div>
+
+    <label>Font</label>
+    <div class="font-options" id="font-options"></div>
+
+    <label for="opacity-input">Tile transparency</label>
+    <input type="range" id="opacity-input" min="10" max="100" step="5" />
 
     <div class="modal-actions">
       <button id="cancel-button" class="secondary">Cancel</button>
