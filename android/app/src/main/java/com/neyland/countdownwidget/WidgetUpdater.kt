@@ -10,7 +10,8 @@ import java.time.Duration
 import java.time.Instant
 
 /** Builds and pushes the widget's RemoteViews. Shared by the AppWidgetProvider's periodic
- * refresh and the configure Activity's "show something immediately after sign-in" call. */
+ * refresh, the manual refresh button, and the configure Activity's "show something
+ * immediately after sign-in" call. */
 object WidgetUpdater {
 
     /** Fire-and-forget: does the network work on a background thread. */
@@ -20,13 +21,14 @@ object WidgetUpdater {
 
     /** Blocking: caller is responsible for being off the main thread already. */
     fun updateWidgetSync(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-        val views = buildViews(context)
+        val views = buildViews(context, appWidgetId)
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    private fun buildViews(context: Context): RemoteViews {
+    private fun buildViews(context: Context, appWidgetId: Int): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_countdown)
         setWebpagePendingIntent(context, views)
+        setRefreshPendingIntent(context, views, appWidgetId)
 
         if (!AuthManager.isSignedIn(context)) {
             views.setTextViewText(R.id.widget_label, "Tap to set up")
@@ -73,10 +75,26 @@ object WidgetUpdater {
         views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
     }
 
+    private fun setRefreshPendingIntent(context: Context, views: RemoteViews, appWidgetId: Int) {
+        val intent = Intent(context, CountdownWidgetProvider::class.java).apply {
+            action = CountdownWidgetProvider.ACTION_REFRESH
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        }
+        // appWidgetId as the request code keeps each widget instance's PendingIntent distinct.
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, appWidgetId, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        views.setOnClickPendingIntent(R.id.widget_refresh_button, pendingIntent)
+    }
+
     private fun formatDuration(duration: Duration): String {
         val days = duration.toDays()
         val hours = duration.toHours() % 24
-        val minutes = duration.toMinutes() % 60
-        return if (days > 0) "${days}d ${hours}h ${minutes}m" else "${hours}h ${minutes}m"
+        return when {
+            days > 0 -> "${days}d ${hours}h"
+            hours > 0 -> "${hours}h"
+            else -> "<1h"
+        }
     }
 }
