@@ -98,6 +98,7 @@ auth.onAuthStateChanged((user) => {
       unsubscribeSnapshot();
       unsubscribeSnapshot = null;
     }
+    stopCelebration();
   }
 });
 
@@ -156,13 +157,51 @@ function renderPrimary() {
 
   if (!currentPrimaryItem) {
     primaryCard.classList.add("hidden");
+    stopCelebration();
     return;
   }
   primaryCard.classList.remove("hidden");
   applyTileStyle(primaryCard, currentPrimaryItem);
   primaryCard.style.setProperty("--primary-scale", currentPrimaryItem.primaryScale);
   primaryLabel.textContent = currentPrimaryItem.label;
-  primaryTime.textContent = formatDuration(currentPrimaryItem.targetDate - now, true);
+
+  const diff = currentPrimaryItem.targetDate - now;
+  primaryTime.textContent = formatDuration(diff, true);
+
+  if (diff <= 0) {
+    startCelebration();
+  } else {
+    stopCelebration();
+  }
+}
+
+// ---- celebration: fires while the featured countdown is at/past zero,
+// stops as soon as it's deleted, re-dated to the future, or swapped out. ----
+let celebrating = false;
+let celebrationInterval = null;
+
+function fireworksBurst() {
+  confetti({
+    particleCount: 70,
+    angle: 60 + Math.random() * 60,
+    spread: 60 + Math.random() * 20,
+    startVelocity: 45,
+    origin: { x: 0.1 + Math.random() * 0.8, y: 0.7 },
+  });
+}
+
+function startCelebration() {
+  if (celebrating) return;
+  celebrating = true;
+  fireworksBurst();
+  celebrationInterval = setInterval(fireworksBurst, 3500);
+}
+
+function stopCelebration() {
+  if (!celebrating) return;
+  celebrating = false;
+  clearInterval(celebrationInterval);
+  celebrationInterval = null;
 }
 
 primaryCard.addEventListener("click", () => {
