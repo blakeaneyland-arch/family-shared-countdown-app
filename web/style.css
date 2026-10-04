@@ -139,6 +139,15 @@ header {
 
 #countdown-list { margin-bottom: 20px; }
 
+.get-widget-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
 .countdown-item {
   background: var(--bg-elevated);
   border-radius: 12px;
