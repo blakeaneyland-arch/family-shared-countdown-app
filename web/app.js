@@ -241,21 +241,15 @@ function formatDuration(ms, includeSeconds) {
   if (ms <= 0) return "Today!";
   const totalSeconds = Math.floor(ms / 1000);
   const totalDays = Math.floor(totalSeconds / 86400);
-
-  // Once an event is a year or more out, hours/minutes stop being meaningful --
-  // show years + days instead (e.g. retirement, a kid's far-off graduation).
   const years = Math.floor(totalDays / 365);
-  if (years > 0) {
-    const remainingDays = totalDays - years * 365;
-    return `${years}y ${remainingDays}d`;
-  }
-
+  const days = totalDays - years * 365;
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
   const parts = [];
-  if (totalDays > 0) parts.push(`${totalDays}d`);
+  if (years > 0) parts.push(`${years}y`);
+  if (years > 0 || days > 0) parts.push(`${days}d`);
   parts.push(`${String(hours).padStart(2, "0")}h`);
   parts.push(`${String(minutes).padStart(2, "0")}m`);
   if (includeSeconds) parts.push(`${String(seconds).padStart(2, "0")}s`);
