@@ -122,20 +122,21 @@ button.danger {
 .primary-card {
   background: color-mix(in srgb, var(--bg-elevated) 70%, transparent);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: calc(24px * var(--primary-scale, 1));
   text-align: center;
   margin: 8px 0 20px;
   backdrop-filter: blur(4px);
+  cursor: pointer;
 }
 
 .primary-label {
   color: var(--text-dim);
-  font-size: 1.2rem;
+  font-size: calc(1.2rem * var(--tile-scale, 1) * var(--primary-scale, 1));
   margin-bottom: 4px;
 }
 
 .primary-time {
-  font-size: 2.6rem;
+  font-size: calc(2.6rem * var(--tile-scale, 1) * var(--primary-scale, 1));
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -163,13 +164,13 @@ button.danger {
 }
 
 .countdown-item .item-label {
-  font-size: 1.2rem;
+  font-size: calc(1.2rem * var(--tile-scale, 1));
   font-weight: 700;
   margin-bottom: 2px;
 }
 
 .countdown-item .item-time {
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--tile-scale, 1));
   opacity: 0.85;
 }
 
@@ -245,13 +246,14 @@ button.danger {
 
 .font-options {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
 
 .font-option {
-  flex: 1;
-  padding: 10px 6px;
+  flex: 0 1 auto;
+  padding: 8px 12px;
   border-radius: 10px;
   border: 2px solid transparent;
   background: #343b4c;
@@ -261,6 +263,16 @@ button.danger {
 
 .font-option.selected {
   border-color: var(--ui-accent);
+}
+
+#primary-toggle-button {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+#primary-toggle-button.selected {
+  background: var(--ui-accent);
+  color: #1b1f2a;
 }
 
 input[type="range"] {

@@ -6,7 +6,7 @@
 <title>Our Countdown</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Fredoka:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Fredoka:wght@500;600&family=Shadows+Into+Light&family=Permanent+Marker&family=Pacifico&family=Indie+Flower&family=Baloo+2:wght@600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -58,6 +58,14 @@
 
     <label for="opacity-input">Tile transparency</label>
     <input type="range" id="opacity-input" min="10" max="100" step="5" />
+
+    <label for="scale-input">Text size</label>
+    <input type="range" id="scale-input" min="0.7" max="1.6" step="0.05" />
+
+    <label for="primary-scale-input">Featured size (when shown at the top)</label>
+    <input type="range" id="primary-scale-input" min="1" max="2.2" step="0.05" />
+
+    <button type="button" id="primary-toggle-button" class="secondary">&#11088; Show at the top</button>
 
     <div class="modal-actions">
       <button id="cancel-button" class="secondary">Cancel</button>

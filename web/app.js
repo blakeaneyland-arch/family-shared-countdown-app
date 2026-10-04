@@ -9,6 +9,8 @@ const DEFAULT_COLOR = "#e2b33c";
 const DEFAULT_TEXT_COLOR = "#f4f3f7";
 const DEFAULT_FONT = "caveat";
 const DEFAULT_OPACITY = 30;
+const DEFAULT_FONT_SCALE = 1;
+const DEFAULT_PRIMARY_SCALE = 1;
 
 const COLOR_PALETTE = ["#e2b33c", "#9b3a3a", "#3b5a8a", "#4a7a4f", "#c97a3d", "#3a8a82"];
 const TEXT_COLOR_PALETTE = ["#f4f3f7", "#1b1f2a", "#e2b33c", "#ff7a9e"];
@@ -16,6 +18,11 @@ const FONTS = {
   caveat: { label: "Caveat", family: "'Caveat', cursive" },
   patrick: { label: "Patrick Hand", family: "'Patrick Hand', sans-serif" },
   fredoka: { label: "Fredoka", family: "'Fredoka', sans-serif" },
+  shadows: { label: "Shadows", family: "'Shadows Into Light', cursive" },
+  marker: { label: "Marker", family: "'Permanent Marker', cursive" },
+  pacifico: { label: "Pacifico", family: "'Pacifico', cursive" },
+  indie: { label: "Indie Flower", family: "'Indie Flower', cursive" },
+  baloo: { label: "Baloo", family: "'Baloo 2', sans-serif" },
 };
 
 // ---- element refs ----
@@ -42,15 +49,21 @@ const colorSwatchesEl = document.getElementById("color-swatches");
 const textColorSwatchesEl = document.getElementById("text-color-swatches");
 const fontOptionsEl = document.getElementById("font-options");
 const opacityInput = document.getElementById("opacity-input");
+const scaleInput = document.getElementById("scale-input");
+const primaryScaleInput = document.getElementById("primary-scale-input");
+const primaryToggleButton = document.getElementById("primary-toggle-button");
 const saveButton = document.getElementById("save-button");
 const cancelButton = document.getElementById("cancel-button");
 const deleteButton = document.getElementById("delete-button");
 
-let currentCountdowns = []; // [{id, label, targetDate, color, textColor, font, opacity}]
+// [{id, label, targetDate, color, textColor, font, opacity, fontScale, primaryScale, isPrimary}]
+let currentCountdowns = [];
+let currentPrimaryItem = null;
 let editingId = null;
 let selectedColor = DEFAULT_COLOR;
 let selectedTextColor = DEFAULT_TEXT_COLOR;
 let selectedFont = DEFAULT_FONT;
+let selectedIsPrimary = false;
 let unsubscribeSnapshot = null;
 
 // ---- auth ----
@@ -104,6 +117,9 @@ function startListening() {
           textColor: data.textColor || DEFAULT_TEXT_COLOR,
           font: data.font && FONTS[data.font] ? data.font : DEFAULT_FONT,
           opacity: data.opacity != null ? data.opacity : DEFAULT_OPACITY,
+          fontScale: data.fontScale || DEFAULT_FONT_SCALE,
+          primaryScale: data.primaryScale || DEFAULT_PRIMARY_SCALE,
+          isPrimary: !!data.isPrimary,
         };
       });
       renderAll();
@@ -122,6 +138,7 @@ function applyTileStyle(el, item) {
   el.style.background = hexToRgba(item.color, item.opacity);
   el.style.color = item.textColor;
   el.style.fontFamily = FONTS[item.font].family;
+  el.style.setProperty("--tile-scale", item.fontScale);
 }
 
 // ---- rendering ----
@@ -132,19 +149,30 @@ function renderAll() {
 
 function renderPrimary() {
   const now = new Date();
-  const upcoming = currentCountdowns.find((c) => c.targetDate.getTime() > now.getTime());
-  if (!upcoming) {
+  currentPrimaryItem =
+    currentCountdowns.find((c) => c.isPrimary) ||
+    currentCountdowns.find((c) => c.targetDate.getTime() > now.getTime()) ||
+    null;
+
+  if (!currentPrimaryItem) {
     primaryCard.classList.add("hidden");
     return;
   }
   primaryCard.classList.remove("hidden");
-  applyTileStyle(primaryCard, upcoming);
-  primaryLabel.textContent = upcoming.label;
-  primaryTime.textContent = formatDuration(upcoming.targetDate - now, true);
+  applyTileStyle(primaryCard, currentPrimaryItem);
+  primaryCard.style.setProperty("--primary-scale", currentPrimaryItem.primaryScale);
+  primaryLabel.textContent = currentPrimaryItem.label;
+  primaryTime.textContent = formatDuration(currentPrimaryItem.targetDate - now, true);
 }
 
+primaryCard.addEventListener("click", () => {
+  if (currentPrimaryItem) openEditModal(currentPrimaryItem);
+});
+
 function renderList() {
-  if (currentCountdowns.length === 0) {
+  const rest = currentCountdowns.filter((c) => !currentPrimaryItem || c.id !== currentPrimaryItem.id);
+
+  if (rest.length === 0) {
     emptyState.classList.remove("hidden");
     listEl.innerHTML = "";
     return;
@@ -153,7 +181,7 @@ function renderList() {
 
   const now = new Date();
   listEl.innerHTML = "";
-  for (const item of currentCountdowns) {
+  for (const item of rest) {
     const diff = item.targetDate - now;
     const row = document.createElement("div");
     row.className = "countdown-item";
@@ -235,17 +263,30 @@ function renderPickers() {
   renderFontOptions();
 }
 
+function renderPrimaryToggle() {
+  primaryToggleButton.classList.toggle("selected", selectedIsPrimary);
+}
+
+primaryToggleButton.addEventListener("click", () => {
+  selectedIsPrimary = !selectedIsPrimary;
+  renderPrimaryToggle();
+});
+
 function openEditModal(item) {
   editingId = item ? item.id : null;
   selectedColor = item ? item.color : DEFAULT_COLOR;
   selectedTextColor = item ? item.textColor : DEFAULT_TEXT_COLOR;
   selectedFont = item ? item.font : DEFAULT_FONT;
+  selectedIsPrimary = item ? item.isPrimary : false;
   opacityInput.value = item ? item.opacity : DEFAULT_OPACITY;
+  scaleInput.value = item ? item.fontScale : DEFAULT_FONT_SCALE;
+  primaryScaleInput.value = item ? item.primaryScale : DEFAULT_PRIMARY_SCALE;
   modalTitle.textContent = item ? "Edit countdown" : "Add countdown";
   labelInput.value = item ? item.label : "";
   dateInput.value = item ? toDatetimeLocalValue(item.targetDate) : "";
   deleteButton.classList.toggle("hidden", !item);
   renderPickers();
+  renderPrimaryToggle();
   editModal.classList.remove("hidden");
 }
 
@@ -267,14 +308,30 @@ saveButton.addEventListener("click", async () => {
     textColor: selectedTextColor,
     font: selectedFont,
     opacity: Number(opacityInput.value),
+    fontScale: Number(scaleInput.value),
+    primaryScale: Number(primaryScaleInput.value),
+    isPrimary: selectedIsPrimary,
   };
 
+  const batch = db.batch();
+
+  // Only one countdown can be primary at a time -- clear it from any other doc.
+  if (selectedIsPrimary) {
+    for (const other of currentCountdowns) {
+      if (other.isPrimary && other.id !== editingId) {
+        batch.update(db.collection("countdowns").doc(other.id), { isPrimary: false });
+      }
+    }
+  }
+
   if (editingId) {
-    await db.collection("countdowns").doc(editingId).update(data);
+    batch.update(db.collection("countdowns").doc(editingId), data);
   } else {
     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-    await db.collection("countdowns").add(data);
+    batch.set(db.collection("countdowns").doc(), data);
   }
+
+  await batch.commit();
   closeEditModal();
 });
 
