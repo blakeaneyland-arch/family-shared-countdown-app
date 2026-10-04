@@ -11,6 +11,23 @@
 
 * { box-sizing: border-box; }
 
+/* Sits behind everything; background-image set inline in index.html. */
+.bg-photo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg);
+  background-size: cover;
+  background-position: center;
+}
+
+.bg-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 12, 18, 0.6);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
