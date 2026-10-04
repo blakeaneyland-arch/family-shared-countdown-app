@@ -125,13 +125,33 @@ button.danger {
 .error-text { color: var(--danger); margin-top: 10px; font-size: 0.9rem; }
 
 .primary-card {
+  position: relative;
+  overflow: hidden;
   background: color-mix(in srgb, var(--bg-elevated) 70%, transparent);
   border-radius: var(--radius);
   padding: calc(24px * var(--primary-scale, 1));
   text-align: center;
   margin: 8px 0 20px;
   backdrop-filter: blur(4px);
+  box-shadow: 3px 5px 14px rgba(0, 0, 0, 0.4);
   cursor: pointer;
+}
+
+/* Sticky-note fold: a small curled corner on top of whatever color/opacity
+   the tile has, so the note look doesn't fight the customization. Fixed
+   on the featured card; alternates left/right on the tiles below it. */
+.primary-card::after,
+.countdown-item::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 26px;
+  height: 26px;
+}
+
+.primary-card::after {
+  right: 0;
+  background: linear-gradient(225deg, rgba(255, 255, 255, 0.45) 50%, transparent 50%);
 }
 
 .primary-label {
@@ -165,6 +185,8 @@ button.danger {
    color, font, and opacity are all set inline from JS since they're
    independent per tile. */
 .countdown-item {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -172,6 +194,17 @@ button.danger {
   border-radius: var(--radius);
   padding: 16px 22px;
   backdrop-filter: blur(4px);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.countdown-item:nth-child(odd)::after {
+  right: 0;
+  background: linear-gradient(225deg, rgba(255, 255, 255, 0.45) 50%, transparent 50%);
+}
+
+.countdown-item:nth-child(even)::after {
+  left: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 50%, transparent 50%);
 }
 
 .countdown-item .item-label {
