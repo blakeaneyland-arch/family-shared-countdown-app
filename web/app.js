@@ -29,9 +29,17 @@ const saveButton = document.getElementById("save-button");
 const cancelButton = document.getElementById("cancel-button");
 const deleteButton = document.getElementById("delete-button");
 
+const themeButton = document.getElementById("theme-button");
+const themeModal = document.getElementById("theme-modal");
+const accentColorInput = document.getElementById("accent-color-input");
+const paperColorInput = document.getElementById("paper-color-input");
+const themeSaveButton = document.getElementById("theme-save-button");
+const themeCancelButton = document.getElementById("theme-cancel-button");
+
 let currentCountdowns = []; // [{id, label, targetDate: Date}]
 let editingId = null;
 let unsubscribeSnapshot = null;
+let unsubscribeThemeSnapshot = null;
 
 // ---- auth ----
 loginButton.addEventListener("click", () => {
@@ -65,6 +73,10 @@ auth.onAuthStateChanged((user) => {
       unsubscribeSnapshot();
       unsubscribeSnapshot = null;
     }
+    if (unsubscribeThemeSnapshot) {
+      unsubscribeThemeSnapshot();
+      unsubscribeThemeSnapshot = null;
+    }
   }
 });
 
@@ -84,7 +96,34 @@ function startListening() {
       });
       renderAll();
     });
+
+  unsubscribeThemeSnapshot = db
+    .collection("settings")
+    .doc("theme")
+    .onSnapshot((doc) => {
+      const data = doc.data();
+      if (!data) return;
+      applyTheme(data.accentColor, data.paperColor);
+      accentColorInput.value = data.accentColor;
+      paperColorInput.value = data.paperColor;
+    });
 }
+
+// ---- theme ----
+function applyTheme(accentColor, paperColor) {
+  if (accentColor) document.documentElement.style.setProperty("--accent", accentColor);
+  if (paperColor) document.documentElement.style.setProperty("--bg", paperColor);
+}
+
+themeButton.addEventListener("click", () => themeModal.classList.remove("hidden"));
+themeCancelButton.addEventListener("click", () => themeModal.classList.add("hidden"));
+
+themeSaveButton.addEventListener("click", async () => {
+  const accentColor = accentColorInput.value;
+  const paperColor = paperColorInput.value;
+  await db.collection("settings").doc("theme").set({ accentColor, paperColor });
+  themeModal.classList.add("hidden");
+});
 
 // ---- rendering ----
 function renderAll() {

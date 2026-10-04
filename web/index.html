@@ -4,9 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>Our Countdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+<div class="bg-photo" style="background-image: url('bg-paper-chain.jpg');"></div>
 
 <div id="login-screen" class="screen">
   <div class="login-card">
@@ -21,7 +26,10 @@
 <div id="app-screen" class="screen hidden">
   <header>
     <h1>Our Countdown</h1>
-    <button id="logout-button" title="Sign out of this device">Sign out</button>
+    <div class="header-actions">
+      <button id="theme-button" title="Customize colors" class="icon-button">&#127912;</button>
+      <button id="logout-button" title="Sign out of this device">Sign out</button>
+    </div>
   </header>
 
   <section id="primary-countdown" class="primary-card hidden">
@@ -40,6 +48,24 @@
   <a id="get-widget-link" class="get-widget-link" href="#" target="_blank">
     Get the home-screen widget for Android
   </a>
+</div>
+
+<div id="theme-modal" class="screen hidden">
+  <div class="modal-card">
+    <h2>Customize colors</h2>
+    <p class="subtitle">Shared -- changes apply for both of you</p>
+
+    <label for="accent-color-input">Link color</label>
+    <input type="color" id="accent-color-input" value="#ff7a9e" />
+
+    <label for="paper-color-input">Background color</label>
+    <input type="color" id="paper-color-input" value="#1b1f2a" />
+
+    <div class="modal-actions">
+      <button id="theme-cancel-button" class="secondary">Close</button>
+      <button id="theme-save-button">Save</button>
+    </div>
+  </div>
 </div>
 
 <div id="edit-modal" class="screen hidden">
