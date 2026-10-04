@@ -199,6 +199,18 @@ button.danger {
   box-shadow: 0 4px 14px rgba(0,0,0,0.4);
 }
 
+/* Invisible on purpose -- a real tap target, just with no visual presence. */
+.invisible-hotspot {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 56px;
+  height: 56px;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
 #edit-modal {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;

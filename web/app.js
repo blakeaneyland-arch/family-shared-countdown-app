@@ -13,6 +13,7 @@ const appScreen = document.getElementById("app-screen");
 const passwordInput = document.getElementById("password-input");
 const loginButton = document.getElementById("login-button");
 const loginError = document.getElementById("login-error");
+const logoutButton = document.getElementById("logout-button");
 
 const primaryCard = document.getElementById("primary-countdown");
 const primaryLabel = document.getElementById("primary-label");
@@ -49,6 +50,10 @@ loginButton.addEventListener("click", () => {
 
 passwordInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") loginButton.click();
+});
+
+logoutButton.addEventListener("click", () => {
+  auth.signOut();
 });
 
 auth.onAuthStateChanged((user) => {
