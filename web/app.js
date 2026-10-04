@@ -4,6 +4,8 @@ const db = firebase.firestore();
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 const SHARED_EMAIL = window.SHARED_AUTH_EMAIL;
+const DEFAULT_COLOR = "#e2b33c";
+const COLOR_PALETTE = ["#e2b33c", "#9b3a3a", "#3b5a8a", "#4a7a4f", "#c97a3d", "#3a8a82"];
 
 // ---- element refs ----
 const loginScreen = document.getElementById("login-screen");
@@ -11,7 +13,6 @@ const appScreen = document.getElementById("app-screen");
 const passwordInput = document.getElementById("password-input");
 const loginButton = document.getElementById("login-button");
 const loginError = document.getElementById("login-error");
-const logoutButton = document.getElementById("logout-button");
 
 const primaryCard = document.getElementById("primary-countdown");
 const primaryLabel = document.getElementById("primary-label");
@@ -25,21 +26,15 @@ const editModal = document.getElementById("edit-modal");
 const modalTitle = document.getElementById("modal-title");
 const labelInput = document.getElementById("label-input");
 const dateInput = document.getElementById("date-input");
+const colorSwatchesEl = document.getElementById("color-swatches");
 const saveButton = document.getElementById("save-button");
 const cancelButton = document.getElementById("cancel-button");
 const deleteButton = document.getElementById("delete-button");
 
-const themeButton = document.getElementById("theme-button");
-const themeModal = document.getElementById("theme-modal");
-const accentColorInput = document.getElementById("accent-color-input");
-const paperColorInput = document.getElementById("paper-color-input");
-const themeSaveButton = document.getElementById("theme-save-button");
-const themeCancelButton = document.getElementById("theme-cancel-button");
-
-let currentCountdowns = []; // [{id, label, targetDate: Date}]
+let currentCountdowns = []; // [{id, label, targetDate: Date, color}]
 let editingId = null;
+let selectedColor = DEFAULT_COLOR;
 let unsubscribeSnapshot = null;
-let unsubscribeThemeSnapshot = null;
 
 // ---- auth ----
 loginButton.addEventListener("click", () => {
@@ -56,10 +51,6 @@ passwordInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") loginButton.click();
 });
 
-logoutButton.addEventListener("click", () => {
-  auth.signOut();
-});
-
 auth.onAuthStateChanged((user) => {
   if (user) {
     loginScreen.classList.add("hidden");
@@ -72,10 +63,6 @@ auth.onAuthStateChanged((user) => {
     if (unsubscribeSnapshot) {
       unsubscribeSnapshot();
       unsubscribeSnapshot = null;
-    }
-    if (unsubscribeThemeSnapshot) {
-      unsubscribeThemeSnapshot();
-      unsubscribeThemeSnapshot = null;
     }
   }
 });
@@ -92,38 +79,12 @@ function startListening() {
           id: doc.id,
           label: data.label,
           targetDate: data.targetDate.toDate(),
+          color: data.color || DEFAULT_COLOR,
         };
       });
       renderAll();
     });
-
-  unsubscribeThemeSnapshot = db
-    .collection("settings")
-    .doc("theme")
-    .onSnapshot((doc) => {
-      const data = doc.data();
-      if (!data) return;
-      applyTheme(data.accentColor, data.paperColor);
-      accentColorInput.value = data.accentColor;
-      paperColorInput.value = data.paperColor;
-    });
 }
-
-// ---- theme ----
-function applyTheme(accentColor, paperColor) {
-  if (accentColor) document.documentElement.style.setProperty("--accent", accentColor);
-  if (paperColor) document.documentElement.style.setProperty("--bg", paperColor);
-}
-
-themeButton.addEventListener("click", () => themeModal.classList.remove("hidden"));
-themeCancelButton.addEventListener("click", () => themeModal.classList.add("hidden"));
-
-themeSaveButton.addEventListener("click", async () => {
-  const accentColor = accentColorInput.value;
-  const paperColor = paperColorInput.value;
-  await db.collection("settings").doc("theme").set({ accentColor, paperColor });
-  themeModal.classList.add("hidden");
-});
 
 // ---- rendering ----
 function renderAll() {
@@ -139,6 +100,7 @@ function renderPrimary() {
     return;
   }
   primaryCard.classList.remove("hidden");
+  primaryCard.style.setProperty("--item-color", upcoming.color);
   primaryLabel.textContent = upcoming.label;
   primaryTime.textContent = formatDuration(upcoming.targetDate - now, true);
 }
@@ -157,6 +119,7 @@ function renderList() {
     const diff = item.targetDate - now;
     const row = document.createElement("div");
     row.className = "countdown-item";
+    row.style.setProperty("--item-color", item.color);
     row.innerHTML = `
       <div>
         <div class="item-label"></div>
@@ -194,12 +157,29 @@ setInterval(renderAll, 1000);
 addButton.addEventListener("click", () => openEditModal(null));
 cancelButton.addEventListener("click", closeEditModal);
 
+function renderColorSwatches() {
+  colorSwatchesEl.innerHTML = "";
+  for (const color of COLOR_PALETTE) {
+    const swatch = document.createElement("button");
+    swatch.type = "button";
+    swatch.className = "color-swatch" + (color === selectedColor ? " selected" : "");
+    swatch.style.background = color;
+    swatch.addEventListener("click", () => {
+      selectedColor = color;
+      renderColorSwatches();
+    });
+    colorSwatchesEl.appendChild(swatch);
+  }
+}
+
 function openEditModal(item) {
   editingId = item ? item.id : null;
+  selectedColor = item ? item.color : DEFAULT_COLOR;
   modalTitle.textContent = item ? "Edit countdown" : "Add countdown";
   labelInput.value = item ? item.label : "";
   dateInput.value = item ? toDatetimeLocalValue(item.targetDate) : "";
   deleteButton.classList.toggle("hidden", !item);
+  renderColorSwatches();
   editModal.classList.remove("hidden");
 }
 
@@ -217,6 +197,7 @@ saveButton.addEventListener("click", async () => {
   const data = {
     label,
     targetDate: firebase.firestore.Timestamp.fromDate(targetDate),
+    color: selectedColor,
   };
 
   if (editingId) {

@@ -11,20 +11,10 @@
 </head>
 <body>
 
-<div class="bg-photo" style="background-image: url('bg-paper-chain.jpg?v=2');"></div>
+<div class="bg-photo" style="background-image: url('bg-paper-chain.jpg?v=3');"></div>
 
 <div id="login-screen" class="screen">
   <div class="login-card">
-    <svg class="chain-banner" viewBox="0 0 200 60" aria-hidden="true">
-      <circle class="ring r1" cx="22" cy="36" r="20" />
-      <circle class="ring r2" cx="48" cy="24" r="20" />
-      <circle class="ring r3" cx="74" cy="36" r="20" />
-      <circle class="ring r4" cx="100" cy="24" r="20" />
-      <circle class="ring r5" cx="126" cy="36" r="20" />
-      <circle class="ring r6" cx="152" cy="24" r="20" />
-    </svg>
-    <h1>Our Countdown</h1>
-    <p class="subtitle">Enter the password to unlock</p>
     <input type="password" id="password-input" placeholder="Password" autocomplete="current-password" />
     <button id="login-button">Unlock</button>
     <p id="login-error" class="error-text hidden"></p>
@@ -32,24 +22,6 @@
 </div>
 
 <div id="app-screen" class="screen hidden">
-  <header>
-    <div>
-      <svg class="chain-banner chain-banner-small" viewBox="0 0 200 60" aria-hidden="true">
-        <circle class="ring r1" cx="22" cy="36" r="20" />
-        <circle class="ring r2" cx="48" cy="24" r="20" />
-        <circle class="ring r3" cx="74" cy="36" r="20" />
-        <circle class="ring r4" cx="100" cy="24" r="20" />
-        <circle class="ring r5" cx="126" cy="36" r="20" />
-        <circle class="ring r6" cx="152" cy="24" r="20" />
-      </svg>
-      <h1>Our Countdown</h1>
-    </div>
-    <div class="header-actions">
-      <button id="theme-button" title="Customize colors" class="icon-button">&#127912;</button>
-      <button id="logout-button" title="Sign out of this device">Sign out</button>
-    </div>
-  </header>
-
   <section id="primary-countdown" class="primary-card hidden">
     <div class="primary-label" id="primary-label"></div>
     <div class="primary-time" id="primary-time"></div>
@@ -61,31 +33,7 @@
 
   <section id="countdown-list"></section>
 
-  <button id="add-button">+ Add a countdown</button>
-
-  <a id="get-widget-link" class="get-widget-link"
-     href="https://github.com/blakeaneyland-arch/neyland-family-countdown-releases/releases/download/v1.0/app-debug.apk"
-     target="_blank">
-    Get the home-screen widget for Android
-  </a>
-</div>
-
-<div id="theme-modal" class="screen hidden">
-  <div class="modal-card">
-    <h2>Customize colors</h2>
-    <p class="subtitle">Shared -- changes apply for both of you</p>
-
-    <label for="accent-color-input">Link color</label>
-    <input type="color" id="accent-color-input" value="#ff7a9e" />
-
-    <label for="paper-color-input">Background color</label>
-    <input type="color" id="paper-color-input" value="#1b1f2a" />
-
-    <div class="modal-actions">
-      <button id="theme-cancel-button" class="secondary">Close</button>
-      <button id="theme-save-button">Save</button>
-    </div>
-  </div>
+  <button id="add-button" class="fab" title="Add a countdown">+</button>
 </div>
 
 <div id="edit-modal" class="screen hidden">
@@ -96,6 +44,9 @@
 
     <label for="date-input">When?</label>
     <input type="datetime-local" id="date-input" />
+
+    <label>Color</label>
+    <div class="color-swatches" id="color-swatches"></div>
 
     <div class="modal-actions">
       <button id="cancel-button" class="secondary">Cancel</button>
