@@ -6,7 +6,27 @@
     <path
         android:fillColor="#1B1F2A"
         android:pathData="M0,0h108v108h-108z" />
+
+    <!-- three overlapping paper-chain links, each a ring made from an outer circle
+         minus a smaller inner circle via evenOdd fill -->
     <path
-        android:fillColor="#FF7A9E"
-        android:pathData="M54,32 C54,32 42,16 28,23 C14,30 15,50 28,61 L54,86 L80,61 C93,50 94,30 80,23 C66,16 54,32 54,32 Z" />
+        android:fillColor="#e2b33c"
+        android:fillType="evenOdd"
+        android:pathData="
+            M30,46 m-20,0 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0
+            M30,46 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0" />
+
+    <path
+        android:fillColor="#9b3a3a"
+        android:fillType="evenOdd"
+        android:pathData="
+            M54,64 m-20,0 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0
+            M54,64 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0" />
+
+    <path
+        android:fillColor="#3b5a8a"
+        android:fillType="evenOdd"
+        android:pathData="
+            M78,46 m-20,0 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0
+            M78,46 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0" />
 </vector>

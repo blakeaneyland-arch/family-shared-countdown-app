@@ -6,13 +6,19 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.util.TypedValue
 import android.widget.RemoteViews
 import java.time.Duration
 import java.time.Instant
 
 /** Builds and pushes the widget's RemoteViews. Shared by the AppWidgetProvider's periodic
- * refresh and the configure Activity's "show something immediately after sign-in" call. */
+ * refresh, the resize callback, and the configure Activity's "show something immediately
+ * after sign-in" call. */
 object WidgetUpdater {
+
+    private const val BASE_WIDTH_DP = 110
+    private const val BASE_LABEL_SP = 12f
+    private const val BASE_TIME_SP = 20f
 
     /** Fire-and-forget: does the network work on a background thread. */
     fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
@@ -21,13 +27,14 @@ object WidgetUpdater {
 
     /** Blocking: caller is responsible for being off the main thread already. */
     fun updateWidgetSync(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-        val views = buildViews(context)
+        val views = buildViews(context, appWidgetManager, appWidgetId)
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    private fun buildViews(context: Context): RemoteViews {
+    private fun buildViews(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_countdown)
         setWebpagePendingIntent(context, views)
+        applyTextScale(views, appWidgetManager, appWidgetId)
 
         if (!AuthManager.isSignedIn(context)) {
             views.setTextViewText(R.id.widget_label, "Tap to set up")
@@ -68,6 +75,17 @@ object WidgetUpdater {
         }
 
         return views
+    }
+
+    /** Scales text up as the user resizes the widget bigger, instead of staying fixed
+     * at a size that's only readable at the smallest widget footprint. */
+    private fun applyTextScale(views: RemoteViews, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+        val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, BASE_WIDTH_DP)
+        val scale = (widthDp.toFloat() / BASE_WIDTH_DP).coerceIn(1f, 4f)
+
+        views.setTextViewTextSize(R.id.widget_label, TypedValue.COMPLEX_UNIT_SP, BASE_LABEL_SP * scale)
+        views.setTextViewTextSize(R.id.widget_time, TypedValue.COMPLEX_UNIT_SP, BASE_TIME_SP * scale)
     }
 
     private fun applyColors(views: RemoteViews, item: Countdown) {
