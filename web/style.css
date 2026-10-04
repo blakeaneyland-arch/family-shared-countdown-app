@@ -76,7 +76,8 @@ h2 {
 
 input[type="password"],
 input[type="text"],
-input[type="datetime-local"] {
+input[type="datetime-local"],
+select {
   width: 100%;
   padding: 14px;
   border-radius: 10px;
