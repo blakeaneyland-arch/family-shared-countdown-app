@@ -16,7 +16,6 @@ import java.time.Instant
  * after sign-in" call. */
 object WidgetUpdater {
 
-    private const val BASE_WIDTH_DP = 110
     private const val BASE_LABEL_SP = 12f
     private const val BASE_TIME_SP = 20f
 
@@ -27,14 +26,14 @@ object WidgetUpdater {
 
     /** Blocking: caller is responsible for being off the main thread already. */
     fun updateWidgetSync(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-        val views = buildViews(context, appWidgetManager, appWidgetId)
+        val views = buildViews(context)
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    private fun buildViews(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int): RemoteViews {
+    private fun buildViews(context: Context): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_countdown)
         setWebpagePendingIntent(context, views)
-        applyTextScale(views, appWidgetManager, appWidgetId)
+        applyTextScale(context, views)
 
         if (!AuthManager.isSignedIn(context)) {
             views.setTextViewText(R.id.widget_label, "Tap to set up")
@@ -77,12 +76,10 @@ object WidgetUpdater {
         return views
     }
 
-    /** Scales text up as the user resizes the widget bigger, instead of staying fixed
-     * at a size that's only readable at the smallest widget footprint. */
-    private fun applyTextScale(views: RemoteViews, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-        val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, BASE_WIDTH_DP)
-        val scale = (widthDp.toFloat() / BASE_WIDTH_DP).coerceIn(1f, 4f)
+    /** Text size is a direct manual preference (the configure screen's slider),
+     * not tied to how big the widget box itself is resized. */
+    private fun applyTextScale(context: Context, views: RemoteViews) {
+        val scale = WidgetPrefs.getTextScalePercent(context) / 100f
 
         views.setTextViewTextSize(R.id.widget_label, TypedValue.COMPLEX_UNIT_SP, BASE_LABEL_SP * scale)
         views.setTextViewTextSize(R.id.widget_time, TypedValue.COMPLEX_UNIT_SP, BASE_TIME_SP * scale)

@@ -5,4 +5,5 @@
     android:initialLayout="@layout/widget_countdown"
     android:configure="com.neyland.countdownwidget.WidgetConfigureActivity"
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen" />
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />
