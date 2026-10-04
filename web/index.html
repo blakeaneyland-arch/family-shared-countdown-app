@@ -11,10 +11,16 @@
 </head>
 <body>
 
-<div class="bg-photo" style="background-image: url('bg-paper-chain.jpg');"></div>
-
 <div id="login-screen" class="screen">
   <div class="login-card">
+    <svg class="chain-banner" viewBox="0 0 200 60" aria-hidden="true">
+      <circle class="ring r1" cx="22" cy="36" r="20" />
+      <circle class="ring r2" cx="48" cy="24" r="20" />
+      <circle class="ring r3" cx="74" cy="36" r="20" />
+      <circle class="ring r4" cx="100" cy="24" r="20" />
+      <circle class="ring r5" cx="126" cy="36" r="20" />
+      <circle class="ring r6" cx="152" cy="24" r="20" />
+    </svg>
     <h1>Our Countdown</h1>
     <p class="subtitle">Enter the password to unlock</p>
     <input type="password" id="password-input" placeholder="Password" autocomplete="current-password" />
@@ -25,7 +31,17 @@
 
 <div id="app-screen" class="screen hidden">
   <header>
-    <h1>Our Countdown</h1>
+    <div>
+      <svg class="chain-banner chain-banner-small" viewBox="0 0 200 60" aria-hidden="true">
+        <circle class="ring r1" cx="22" cy="36" r="20" />
+        <circle class="ring r2" cx="48" cy="24" r="20" />
+        <circle class="ring r3" cx="74" cy="36" r="20" />
+        <circle class="ring r4" cx="100" cy="24" r="20" />
+        <circle class="ring r5" cx="126" cy="36" r="20" />
+        <circle class="ring r6" cx="152" cy="24" r="20" />
+      </svg>
+      <h1>Our Countdown</h1>
+    </div>
     <div class="header-actions">
       <button id="theme-button" title="Customize colors" class="icon-button">&#127912;</button>
       <button id="logout-button" title="Sign out of this device">Sign out</button>
