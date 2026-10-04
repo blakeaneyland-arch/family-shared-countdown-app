@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.widget.RemoteViews
 import java.time.Duration
@@ -44,17 +45,22 @@ object WidgetUpdater {
         try {
             val countdowns = FirestoreClient.fetchCountdowns(idToken)
             val now = Instant.now()
-            val upcoming = countdowns.filter { it.targetDate.isAfter(now) }.minByOrNull { it.targetDate }
 
-            if (upcoming == null) {
+            // Same selection rule as the webapp: whichever countdown is explicitly
+            // marked featured, falling back to the soonest upcoming one.
+            val featured = countdowns.find { it.isPrimary }
+                ?: countdowns.filter { it.targetDate.isAfter(now) }.minByOrNull { it.targetDate }
+
+            if (featured == null) {
                 views.setTextViewText(R.id.widget_label, "No countdowns yet")
                 views.setTextViewText(R.id.widget_time, "")
             } else {
-                views.setTextViewText(R.id.widget_label, upcoming.label)
+                views.setTextViewText(R.id.widget_label, featured.label)
                 views.setTextViewText(
                     R.id.widget_time,
-                    formatDuration(Duration.between(now, upcoming.targetDate))
+                    formatDuration(Duration.between(now, featured.targetDate))
                 )
+                applyColors(views, featured)
             }
         } catch (e: Exception) {
             views.setTextViewText(R.id.widget_label, "Couldn't update")
@@ -63,6 +69,23 @@ object WidgetUpdater {
 
         return views
     }
+
+    private fun applyColors(views: RemoteViews, item: Countdown) {
+        val textColor = parseColorSafely(item.textColor, default = Color.WHITE)
+        views.setTextColor(R.id.widget_label, textColor)
+        views.setTextColor(R.id.widget_time, textColor)
+
+        val rgb = parseColorSafely(item.color, default = Color.DKGRAY) and 0x00FFFFFF
+        val alpha = (item.opacity.coerceIn(10, 100) * 255 / 100) shl 24
+        views.setInt(R.id.widget_root, "setBackgroundColor", rgb or alpha)
+    }
+
+    private fun parseColorSafely(hex: String, default: Int): Int =
+        try {
+            Color.parseColor(hex)
+        } catch (e: IllegalArgumentException) {
+            default
+        }
 
     private fun setWebpagePendingIntent(context: Context, views: RemoteViews) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(Constants.WEBPAGE_URL))
@@ -74,10 +97,12 @@ object WidgetUpdater {
     }
 
     private fun formatDuration(duration: Duration): String {
-        val days = duration.toDays()
+        val totalDays = duration.toDays()
+        val years = totalDays / 365
         val hours = duration.toHours() % 24
         return when {
-            days > 0 -> "${days}d ${hours}h"
+            years > 0 -> "${years}y ${totalDays - years * 365}d"
+            totalDays > 0 -> "${totalDays}d ${hours}h"
             hours > 0 -> "${hours}h"
             else -> "<1h"
         }
